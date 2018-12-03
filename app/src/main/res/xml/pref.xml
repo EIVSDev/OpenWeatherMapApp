@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <android.support.v7.preference.SwitchPreferenceCompat
+        android:key="wifi"
+        android:title="WiFi"
+        android:summary="Update when enabled wifi"
+        android:defaultValue="true" />
+
+    <android.support.v7.preference.SwitchPreferenceCompat
+        android:key="start"
+        android:title="Update"
+        android:summary="Update at startup"
+        android:defaultValue="true" />
+
+    <android.support.v7.preference.SwitchPreferenceCompat
+        android:key="enter"
+        android:title="Enter"
+        android:summary="Ask at the entrance"
+        android:defaultValue="true" />
+
+</android.support.v7.preference.PreferenceScreen>

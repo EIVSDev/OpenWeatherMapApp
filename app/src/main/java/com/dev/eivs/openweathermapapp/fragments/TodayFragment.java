@@ -1,6 +1,5 @@
 package com.dev.eivs.openweathermapapp;
 
-
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -11,18 +10,18 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.dev.eivs.openweathermapapp.model.WheatherResult;
 import com.dev.eivs.openweathermapapp.retrofit.ApiServise;
 import com.dev.eivs.openweathermapapp.retrofit.RetrofitClient;
 import com.dev.eivs.openweathermapapp.storage.Storage;
 import com.squareup.picasso.Picasso;
-
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Retrofit;
+import static com.dev.eivs.openweathermapapp.InternetConnection.checkUpdate;
+import static com.dev.eivs.openweathermapapp.InternetConnection.checkWIFI;
 
 
 /**
@@ -30,10 +29,9 @@ import retrofit2.Retrofit;
  */
 public class TodayFragment extends Fragment {
 
-
     ImageView img_weather;
-    TextView txt_city_name1, txt_humidity1, txt_sunrise1, txt_sunset1, txt_pressure1, txt_temperature1, txt_description1,
-            txt_date_time1, txt_wind1, txt_geo_coord1;
+    TextView txt_city_name, txt_humidity, txt_sunrise, txt_sunset, txt_pressure, txt_temperature, txt_description,
+             txt_date_time, txt_wind, txt_geo_coord;
     LinearLayout weather_panel;
     ProgressBar loading;
 
@@ -59,20 +57,21 @@ public class TodayFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View itemView = inflater.inflate(R.layout.fragment_today, container, false);
 
         img_weather = (ImageView) itemView.findViewById(R.id.img_weather);
 
-        txt_city_name1 = (TextView) itemView.findViewById(R.id.txt_city_name);
-        txt_humidity1 = (TextView) itemView.findViewById(R.id.txt_humidity);
-        txt_sunrise1 = (TextView) itemView.findViewById(R.id.txt_sunrise);
-        txt_sunset1 = (TextView) itemView.findViewById(R.id.txt_sunset);
-        txt_pressure1 = (TextView) itemView.findViewById(R.id.txt_pressure);
-        txt_temperature1 = (TextView) itemView.findViewById(R.id.txt_temperature);
-        txt_description1 = (TextView) itemView.findViewById(R.id.txt_description);
-        txt_date_time1 = (TextView) itemView.findViewById(R.id.txt_date_time);
-        txt_wind1 = (TextView) itemView.findViewById(R.id.txt_wind);
-        txt_geo_coord1 = (TextView) itemView.findViewById(R.id.txt_geo_coord);
+        txt_city_name = (TextView) itemView.findViewById(R.id.txt_city_name);
+        txt_humidity = (TextView) itemView.findViewById(R.id.txt_humidity);
+        txt_sunrise = (TextView) itemView.findViewById(R.id.txt_sunrise);
+        txt_sunset = (TextView) itemView.findViewById(R.id.txt_sunset);
+        txt_pressure = (TextView) itemView.findViewById(R.id.txt_pressure);
+        txt_temperature = (TextView) itemView.findViewById(R.id.txt_temperature);
+        txt_description = (TextView) itemView.findViewById(R.id.txt_description);
+        txt_date_time = (TextView) itemView.findViewById(R.id.txt_date_time);
+        txt_wind = (TextView) itemView.findViewById(R.id.txt_wind);
+        txt_geo_coord = (TextView) itemView.findViewById(R.id.txt_geo_coord);
 
         weather_panel = (LinearLayout) itemView.findViewById(R.id.weather_panel);
         loading = (ProgressBar) itemView.findViewById(R.id.loading);
@@ -83,6 +82,23 @@ public class TodayFragment extends Fragment {
     }
 
     private void getWeatherInformation() {
+        if (checkUpdate&&InternetConnection.checkConnection(getContext())) {
+            if(checkWIFI && InternetConnection.checkWifiOnAndConnected(getContext())){
+                loadInfo();
+              }
+            else if(checkWIFI && !InternetConnection.checkWifiOnAndConnected(getContext())){
+                Toast.makeText(getContext(),"disabled wifi",Toast.LENGTH_LONG).show();
+            }
+            else if(!checkWIFI){
+                loadInfo();
+            }
+        }
+        else {
+            Toast.makeText(getContext(),"internet disconnected",Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void loadInfo() {
         compositeDisposable.add(mService.getWheatherByLatLng(String.valueOf(Storage.current_location.getLatitude()),
                 String.valueOf(Storage.current_location.getLongitude()),
                 Storage.APP_ID,
@@ -97,18 +113,17 @@ public class TodayFragment extends Fragment {
                                            .append(wheatherResult.getWeather().get(0).getIcon())
                                            .append(".png").toString()).into(img_weather);
 
-                                   txt_city_name1.setText(wheatherResult.getName());
-                                   txt_description1.setText(new StringBuilder("Weather in ")
+                                   txt_city_name.setText(wheatherResult.getName());
+                                   txt_description.setText(new StringBuilder("Weather in ")
                                            .append(wheatherResult.getName()).toString());
-                                   txt_temperature1.setText(new StringBuilder(String.valueOf(wheatherResult.getMain().getTemp()))
+                                   txt_temperature.setText(new StringBuilder(String.valueOf(wheatherResult.getMain().getTemp()))
                                            .append("°C").toString());
-                                   txt_date_time1.setText(Storage.convertUnixToDate(wheatherResult.getDt()));
-                                   txt_pressure1.setText(new StringBuilder(String.valueOf(wheatherResult.getMain().getPressure())).append(" hpa").toString());
-                                   txt_humidity1.setText(new StringBuilder(String.valueOf(wheatherResult.getMain().getHumidity())).append(" %").toString());
-                                   txt_sunrise1.setText(Storage.convertUnixToHour(wheatherResult.getSys().getSunrise()));
-                                   txt_sunset1.setText(Storage.convertUnixToHour(wheatherResult.getSys().getSunset()));
-                                   txt_geo_coord1.setText(new StringBuilder(wheatherResult.getCoord().toString()).toString());
-
+                                   txt_date_time.setText(Storage.convertUnixToDate(wheatherResult.getDt()));
+                                   txt_pressure.setText(new StringBuilder(String.valueOf(wheatherResult.getMain().getPressure())).append(" hpa").toString());
+                                   txt_humidity.setText(new StringBuilder(String.valueOf(wheatherResult.getMain().getHumidity())).append(" %").toString());
+                                   txt_sunrise.setText(Storage.convertUnixToHour(wheatherResult.getSys().getSunrise()));
+                                   txt_sunset.setText(Storage.convertUnixToHour(wheatherResult.getSys().getSunset()));
+                                   txt_geo_coord.setText(new StringBuilder(wheatherResult.getCoord().toString()).toString());
 
                                    weather_panel.setVisibility(View.VISIBLE);
                                    loading.setVisibility(View.GONE);
@@ -120,10 +135,15 @@ public class TodayFragment extends Fragment {
                                    Toast.makeText(getActivity(), "" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                                }
                            }
-
                 )
 
         );
+    }
+
+    @Override
+    public void onDestroy() {
+        compositeDisposable.clear();
+        super.onDestroy();
     }
 
     @Override
